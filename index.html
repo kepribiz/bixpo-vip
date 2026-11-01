@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>VIP 좌석</title><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><style>[hidden]{display:none!important}body{margin:0}:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}</style></head><body><title>BIXPO VIP 좌석 찾기</title>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><style>[hidden]{display:none!important}body{margin:0}:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}</style></head><body><title>BIXPO VIP 좌석 찾기</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
 <style>
@@ -62,18 +62,21 @@ const isJamo=c=>CHO.includes(c);
 const cho=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?CHO[Math.floor(k/588)]:c};
 const norm=s=>(s||"").toLowerCase().replace(/\s+/g,"");
 // match: returns [start,len] in normalized target or null; query jamo matches syllable's initial
+const jong=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?k%28:-1};
+const jung=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?Math.floor((k%588)/28):-1};
+// returns [start,len,loose] ; loose = matched only because the last syllable is still being typed
 function find(target,q){
-  const t=norm(target);
+  const t=norm(target);let best=null;
   for(let i=0;i+q.length<=t.length;i++){
-    let ok=true;
+    let ok=true,loose=false;
     for(let j=0;j<q.length;j++){const a=t[i+j],b=q[j];
       if(a===b)continue; if(isJamo(b)&&cho(a)===b)continue;
-      // last char still being typed (e.g. 태 while target 태균): compare initial
-      if(j===q.length-1&&cho(b)!==b&&cho(a)===cho(b))continue;
+      // last syllable without 받침, still being typed: 주 → 준, 규 → 균
+      if(j===q.length-1&&jong(b)===0&&cho(a)===cho(b)&&jung(a)===jung(b)){loose=true;continue}
       ok=false;break}
-    if(ok)return [i,q.length];
+    if(ok){if(!loose)return [i,q.length,false]; if(!best)best=[i,q.length,true]}
   }
-  return null;
+  return best;
 }
 // map normalized index back to original string for highlighting
 function hl(orig,m){
@@ -108,7 +111,7 @@ function render(){
   for(const p of people){
     if(!q){res.push([p,0,null,null,null]);continue}
     const mn=find(p.n,q),mt=find(p.t,q),mo=find(p.o,q);
-    if(mn||mt||mo){const score=mn?(mn[0]===0?0:1):2;res.push([p,score,mn,mt,mo])}
+    if(mn||mt||mo){const score=mn?(mn[2]?2:0)+(mn[0]===0?0:1):4;res.push([p,score,mn,mt,mo])}
   }
   res.sort((a,b)=>a[1]-b[1]||idx(a[0].s)-idx(b[0].s));
   $c.textContent=q?`${res.length}명 일치`:`전체 ${people.length}명 · 이름 첫 글자만 입력해도 됩니다`;

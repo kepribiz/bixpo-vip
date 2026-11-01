@@ -1,0 +1,122 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>VIP 좌석</title><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><style>[hidden]{display:none!important}body{margin:0}:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}</style></head><body><title>BIXPO VIP 좌석 찾기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: sticky search bar on top, result cards below, each with a mini 4×10 seat map */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --fg:#14213a; --muted:#5d6a82; --line:#d9dfea;
+  --accent:#1747a6; --accent-soft:#e3ebfb; --hit:#ffd23f; --empty:#eceff5;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1524; --surface:#172034; --fg:#e8edf7; --muted:#9aa7c0; --line:#2a3550;
+  --accent:#7ea3ff; --accent-soft:#1f2c4a; --hit:#ffd23f; --empty:#1c263c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1524; --surface:#172034; --fg:#e8edf7; --muted:#9aa7c0; --line:#2a3550;
+  --accent:#7ea3ff; --accent-soft:#1f2c4a; --hit:#ffd23f; --empty:#1c263c; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.searchbox{position:relative}
+#q{width:100%;box-sizing:border-box;font:500 20px/1.2 var(--sans);padding:14px 48px 14px 16px;border:2px solid var(--accent);border-radius:12px;background:var(--surface);color:var(--fg);outline:none}
+#q:focus{box-shadow:0 0 0 4px var(--accent-soft)}
+#clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:var(--empty);color:var(--muted);font-size:18px}
+#count{font-size:13px;color:var(--muted)}
+#list{display:grid;gap:10px;margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+.seat{grid-row:span 2;font:700 36px/1 var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:12px;padding:16px 12px;min-width:104px;text-align:center}
+.name{font-size:26px;font-weight:700;line-height:1.2;min-width:0}
+.meta{color:var(--muted);font-size:15px;min-width:0}
+mark{background:var(--hit);color:#14213a;border-radius:3px;padding:0 1px}
+.map{grid-column:1/-1;margin-top:10px;display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.map i{display:block;aspect-ratio:1.2;border-radius:4px;background:var(--empty);font:700 13px/1 var(--mono);color:var(--muted);display:flex;align-items:center;justify-content:center;font-style:normal}
+.map i.on{background:var(--hit);color:#14213a;font-size:15px;box-shadow:0 0 0 2px var(--accent)}
+.where{grid-column:1/-1;font-size:17px;color:var(--muted)}
+.where b{color:var(--fg);font-size:20px}
+.none{padding:28px 8px;text-align:center;color:var(--muted)}
+footer{margin-top:18px;font-size:12px;color:var(--muted)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">BIXPO 2026 · VIP 좌석 (A-1 ~ A-40)</div>
+  <div class="searchbox">
+    <input id="q" type="search" placeholder="이름 · 소속 · 초성(ㄱㅌㄱ)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+    <button id="clear" aria-label="지우기" hidden>×</button>
+  </div>
+  <div id="count"></div>
+</header>
+<main id="list"></main>
+<footer>좌석 지도는 엑셀 배치 순서(1행 A-1~A-10 … 4행 A-31~A-40) 기준입니다. 무대 방향은 현장 배치도로 확인하세요.</footer>
+</div>
+
+<script>
+const DATA = [{"s": "A-1", "n": "Dang Huy Cuong", "t": "Board member", "o": "EVN"}, {"s": "A-2", "n": "Nigel Reams", "t": "CEO", "o": "Lumcloon Energy"}, {"s": "A-3", "n": "Unggul Priyanto", "t": "Council member", "o": "DEN"}, {"s": "A-4", "n": "Satya Widya Yudha", "t": "Council member", "o": "DEN"}, {"s": "A-5", "n": "김태균", "t": "CEO", "o": "한국전력기술"}, {"s": "A-6", "n": "김동철", "t": "CEO", "o": "한국전력공사"}, {"s": "A-7", "n": "", "t": "", "o": ""}, {"s": "A-8", "n": "문일주", "t": "기술혁신본부장", "o": "한국전력공사"}, {"s": "A-9", "n": "이정호", "t": "고객서비스혁신본부장", "o": "한국전력공사"}, {"s": "A-10", "n": "김대한", "t": "전력연구원장", "o": "한국전력공사"}, {"s": "A-11", "n": "김수영", "t": "상무", "o": "SK 나래에너지"}, {"s": "A-12", "n": "이경모", "t": "전무", "o": "현대중공업파워시스템"}, {"s": "A-13", "n": "이병목", "t": "전무", "o": "SGC에너지"}, {"s": "A-14", "n": "김현경", "t": "본부장", "o": "한국에너지기술평가원"}, {"s": "A-15", "n": "장세창", "t": "명예회장", "o": "한국전기산업진흥회"}, {"s": "A-16", "n": "이준호", "t": "CEO", "o": "켑코솔라"}, {"s": "A-17", "n": "장재원", "t": "상근부회장", "o": "한국스마트그리드협회"}, {"s": "A-18", "n": "이돈국", "t": "원장", "o": "한국수력원자력"}, {"s": "A-19", "n": "이찬주", "t": "CTO", "o": "HD현대일렉트릭"}, {"s": "A-20", "n": "Mark McGranghan", "t": "Fellow", "o": "EPRI"}, {"s": "A-21", "n": "김성철", "t": "연구원장", "o": "한전KDN 전력ICT연구원"}, {"s": "A-22", "n": "최종호", "t": "실장", "o": "한국전력공사"}, {"s": "A-23", "n": "이방욱", "t": "공대학장", "o": "한양대학교"}, {"s": "A-24", "n": "최광식", "t": "처장", "o": "한국수력원자력"}, {"s": "A-25", "n": "곽상영", "t": "처장", "o": "한국전력공사"}, {"s": "A-26", "n": "심은보", "t": "처장", "o": "한국전력공사"}, {"s": "A-27", "n": "우정욱", "t": "부원장", "o": "한국전력공사"}, {"s": "A-28", "n": "이욱륜", "t": "센터장", "o": "한국전력공사"}, {"s": "A-29", "n": "(예비)", "t": "사장", "o": "비츠로일렉트릭"}, {"s": "A-30", "n": "조재수", "t": "한국법인장", "o": "EPRI"}, {"s": "A-31", "n": "박기준", "t": "소장", "o": "AI연구소"}, {"s": "A-32", "n": "이병성", "t": "소장", "o": "안전연구소"}, {"s": "A-33", "n": "변승현", "t": "소장", "o": "융복합연구소"}, {"s": "A-34", "n": "김주용", "t": "소장", "o": "차세대배전연구소"}, {"s": "A-35", "n": "장성호", "t": "소장", "o": "기초전력연구센터"}, {"s": "A-36", "n": "송재근", "t": "실장", "o": "기획관리실"}, {"s": "A-37", "n": "차승태", "t": "소장", "o": "전력계통연구소"}, {"s": "A-38", "n": "박명혜", "t": "소장", "o": "디지털솔루션연구소"}, {"s": "A-39", "n": "이종민", "t": "소장", "o": "에너지환경연구소"}, {"s": "A-40", "n": "김용학", "t": "소장", "o": "신사업기술연구소"}]
+;
+const CHO="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+const isJamo=c=>CHO.includes(c);
+const cho=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?CHO[Math.floor(k/588)]:c};
+const norm=s=>(s||"").toLowerCase().replace(/\s+/g,"");
+// match: returns [start,len] in normalized target or null; query jamo matches syllable's initial
+function find(target,q){
+  const t=norm(target);
+  for(let i=0;i+q.length<=t.length;i++){
+    let ok=true;
+    for(let j=0;j<q.length;j++){const a=t[i+j],b=q[j];
+      if(a===b)continue; if(isJamo(b)&&cho(a)===b)continue;
+      // last char still being typed (e.g. 태 while target 태균): compare initial
+      if(j===q.length-1&&cho(b)!==b&&cho(a)===cho(b))continue;
+      ok=false;break}
+    if(ok)return [i,q.length];
+  }
+  return null;
+}
+// map normalized index back to original string for highlighting
+function hl(orig,m){
+  if(!m)return esc(orig);
+  let n=-1,s=-1,e=-1;
+  for(let i=0;i<orig.length;i++){ if(/\s/.test(orig[i]))continue; n++; if(n===m[0])s=i; if(n===m[0]+m[1]-1){e=i+1;break} }
+  if(s<0||e<0)return esc(orig);
+  return esc(orig.slice(0,s))+"<mark>"+esc(orig.slice(s,e))+"</mark>"+esc(orig.slice(e));
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const people=DATA.filter(d=>d.n);
+const idx=s=>parseInt(s.split("-")[1],10);
+function map(seat){
+  const k=idx(seat);let h="";
+  for(let i=1;i<=40;i++)h+=`<i class="${i===k?"on":""}">${i===k?i:""}</i>`;
+  return h;
+}
+function card(p,mn,mt,mo){
+  const k=idx(p.s),row=Math.ceil(k/10),col=(k-1)%10+1;
+  return `<article class="card">
+    <div class="seat">${p.s}</div>
+    <div class="name">${hl(p.n,mn)}</div>
+    <div class="meta">${hl(p.t,mt)} · ${hl(p.o,mo)}</div>
+    <div class="map" aria-hidden="true">${map(p.s)}</div>
+    <div class="where"><b>${row}행 ${col}번째</b> 좌석 (엑셀 배치 기준)</div>
+  </article>`;
+}
+const $q=document.getElementById("q"),$l=document.getElementById("list"),$c=document.getElementById("count"),$x=document.getElementById("clear");
+function render(){
+  const q=norm($q.value);$x.hidden=!q;
+  let res=[];
+  for(const p of people){
+    if(!q){res.push([p,0,null,null,null]);continue}
+    const mn=find(p.n,q),mt=find(p.t,q),mo=find(p.o,q);
+    if(mn||mt||mo){const score=mn?(mn[0]===0?0:1):2;res.push([p,score,mn,mt,mo])}
+  }
+  res.sort((a,b)=>a[1]-b[1]||idx(a[0].s)-idx(b[0].s));
+  $c.textContent=q?`${res.length}명 일치`:`전체 ${people.length}명 · 이름 첫 글자만 입력해도 됩니다`;
+  $l.innerHTML=res.length?res.map(r=>card(r[0],r[2],r[3],r[4])).join(""):`<div class="none">“${esc($q.value)}”와 일치하는 VIP가 없습니다.<br>성만 입력하거나 소속으로 찾아보세요.</div>`;
+}
+$q.addEventListener("input",render);
+$q.addEventListener("compositionupdate",()=>setTimeout(render,0));
+$x.addEventListener("click",()=>{$q.value="";render();$q.focus()});
+render();
+</script>
+</body></html>

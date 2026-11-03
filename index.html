@@ -2,48 +2,56 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: sticky search bar on top, result cards below, each with a mini 4×10 seat map */
+/* Layout: sticky search bar, result cards with block close-up + whole-hall locator */
 :root{
   --bg:#f3f5f9; --surface:#ffffff; --fg:#14213a; --muted:#5d6a82; --line:#d9dfea;
-  --accent:#1747a6; --accent-soft:#e3ebfb; --hit:#ffd23f; --empty:#eceff5;
+  --accent:#1747a6; --accent-soft:#e3ebfb; --hit:#ffd23f; --empty:#e6eaf2; --filled:#c5cfe0; --role:#0f7a5c; --role-soft:#dcf3ea;
   --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0e1524; --surface:#172034; --fg:#e8edf7; --muted:#9aa7c0; --line:#2a3550;
-  --accent:#7ea3ff; --accent-soft:#1f2c4a; --hit:#ffd23f; --empty:#1c263c; color-scheme:dark}}
+  --accent:#7ea3ff; --accent-soft:#1f2c4a; --hit:#ffd23f; --empty:#1c263c; --filled:#33415f; --role:#5fd3a8; --role-soft:#163a31; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e1524; --surface:#172034; --fg:#e8edf7; --muted:#9aa7c0; --line:#2a3550;
-  --accent:#7ea3ff; --accent-soft:#1f2c4a; --hit:#ffd23f; --empty:#1c263c; color-scheme:dark}
+  --accent:#7ea3ff; --accent-soft:#1f2c4a; --hit:#ffd23f; --empty:#1c263c; --filled:#33415f; --role:#5fd3a8; --role-soft:#163a31; color-scheme:dark}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.45}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:grid;gap:8px}
-.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.eyebrow{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:500}
 .searchbox{position:relative}
 #q{width:100%;box-sizing:border-box;font:500 20px/1.2 var(--sans);padding:14px 48px 14px 16px;border:2px solid var(--accent);border-radius:12px;background:var(--surface);color:var(--fg);outline:none}
 #q:focus{box-shadow:0 0 0 4px var(--accent-soft)}
 #clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:var(--empty);color:var(--muted);font-size:18px}
 #count{font-size:13px;color:var(--muted)}
 #list{display:grid;gap:10px;margin-top:4px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
-.seat{grid-row:span 2;font:700 36px/1 var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:12px;padding:16px 12px;min-width:104px;text-align:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;cursor:pointer}
+.seat{grid-row:span 3;font:700 32px/1 var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:12px;padding:16px 10px;min-width:104px;box-sizing:border-box;text-align:center;align-self:stretch;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+.seat small{font:500 12px/1 var(--sans);color:var(--muted)}
 .name{font-size:26px;font-weight:700;line-height:1.2;min-width:0}
 .meta{color:var(--muted);font-size:15px;min-width:0}
+.role{justify-self:start;font-size:13px;font-weight:700;color:var(--role);background:var(--role-soft);border-radius:6px;padding:2px 8px}
 mark{background:var(--hit);color:#14213a;border-radius:3px;padding:0 1px}
-.map{grid-column:1/-1;margin-top:10px;display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
-.map i{display:block;aspect-ratio:1.2;border-radius:4px;background:var(--empty);font:700 13px/1 var(--mono);color:var(--muted);display:flex;align-items:center;justify-content:center;font-style:normal}
-.map i.on{background:var(--hit);color:#14213a;font-size:15px;box-shadow:0 0 0 2px var(--accent)}
-.where{grid-column:1/-1;font-size:17px;color:var(--muted)}
-.where b{color:var(--fg);font-size:20px}
+.where{grid-column:1/-1;font-size:17px;color:var(--muted);margin-top:6px}
+.where b{color:var(--fg);font-size:19px}
+.lbl{grid-column:1/-1;font-size:12px;color:var(--muted);letter-spacing:.04em;margin-top:8px}
+.blk{grid-column:1/-1;display:grid;gap:4px}
+.blk i{border-radius:4px;background:var(--empty);font:700 12px/1 var(--mono);color:var(--muted);display:flex;align-items:center;justify-content:center;font-style:normal;aspect-ratio:1.2;min-width:0}
+.blk i.on{background:var(--hit);color:#14213a;font-size:14px;box-shadow:0 0 0 2px var(--accent)}
+.hall{grid-column:1/-1;display:grid;gap:1px;padding:6px;border:1px solid var(--line);border-radius:8px}
+.hall i{display:block;aspect-ratio:1;border-radius:1px;background:var(--empty)}
+.hall i.f{background:var(--filled)}
+.hall i.on{background:var(--hit);box-shadow:0 0 0 1.5px var(--accent);border-radius:2px;position:relative;z-index:1}
+.hint{grid-column:1/-1;font-size:13px;color:var(--accent)}
 .none{padding:28px 8px;text-align:center;color:var(--muted)}
-footer{margin-top:18px;font-size:12px;color:var(--muted)}
-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{margin-top:18px;font-size:12px;color:var(--muted);display:grid;gap:4px}
+button:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 
 <div class="wrap">
 <header>
-  <div class="eyebrow">BIXPO 2026 · VIP 좌석 (A-1 ~ A-40)</div>
+  <div class="eyebrow" id="eyebrow"></div>
   <div class="searchbox">
     <input id="q" type="search" placeholder="이름 · 소속 · 초성(ㄱㅌㄱ)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
     <button id="clear" aria-label="지우기" hidden>×</button>
@@ -51,34 +59,37 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div id="count"></div>
 </header>
 <main id="list"></main>
-<footer>좌석 지도는 엑셀 배치 순서(1행 A-1~A-10 … 4행 A-31~A-40) 기준입니다. 무대 방향은 현장 배치도로 확인하세요.</footer>
+<footer>
+  <div>좌석 지도는 엑셀 「전체 좌석배치도」 탭의 배치 그대로입니다(위쪽 = 엑셀 위쪽).</div>
+  <div id="ver"></div>
+</footer>
 </div>
 
 <script>
-const DATA = [{"s": "A-1", "n": "Dang Huy Cuong", "t": "Board member", "o": "EVN"}, {"s": "A-2", "n": "Nigel Reams", "t": "CEO", "o": "Lumcloon Energy"}, {"s": "A-3", "n": "Unggul Priyanto", "t": "Council member", "o": "DEN"}, {"s": "A-4", "n": "Satya Widya Yudha", "t": "Council member", "o": "DEN"}, {"s": "A-5", "n": "김태균", "t": "CEO", "o": "한국전력기술"}, {"s": "A-6", "n": "김동철", "t": "CEO", "o": "한국전력공사"}, {"s": "A-7", "n": "", "t": "", "o": ""}, {"s": "A-8", "n": "문일주", "t": "기술혁신본부장", "o": "한국전력공사"}, {"s": "A-9", "n": "이정호", "t": "고객서비스혁신본부장", "o": "한국전력공사"}, {"s": "A-10", "n": "김대한", "t": "전력연구원장", "o": "한국전력공사"}, {"s": "A-11", "n": "김수영", "t": "상무", "o": "SK 나래에너지"}, {"s": "A-12", "n": "이경모", "t": "전무", "o": "현대중공업파워시스템"}, {"s": "A-13", "n": "이병목", "t": "전무", "o": "SGC에너지"}, {"s": "A-14", "n": "김현경", "t": "본부장", "o": "한국에너지기술평가원"}, {"s": "A-15", "n": "장세창", "t": "명예회장", "o": "한국전기산업진흥회"}, {"s": "A-16", "n": "이준호", "t": "CEO", "o": "켑코솔라"}, {"s": "A-17", "n": "장재원", "t": "상근부회장", "o": "한국스마트그리드협회"}, {"s": "A-18", "n": "이돈국", "t": "원장", "o": "한국수력원자력"}, {"s": "A-19", "n": "이찬주", "t": "CTO", "o": "HD현대일렉트릭"}, {"s": "A-20", "n": "Mark McGranghan", "t": "Fellow", "o": "EPRI"}, {"s": "A-21", "n": "김성철", "t": "연구원장", "o": "한전KDN 전력ICT연구원"}, {"s": "A-22", "n": "최종호", "t": "실장", "o": "한국전력공사"}, {"s": "A-23", "n": "이방욱", "t": "공대학장", "o": "한양대학교"}, {"s": "A-24", "n": "최광식", "t": "처장", "o": "한국수력원자력"}, {"s": "A-25", "n": "곽상영", "t": "처장", "o": "한국전력공사"}, {"s": "A-26", "n": "심은보", "t": "처장", "o": "한국전력공사"}, {"s": "A-27", "n": "우정욱", "t": "부원장", "o": "한국전력공사"}, {"s": "A-28", "n": "이욱륜", "t": "센터장", "o": "한국전력공사"}, {"s": "A-29", "n": "(예비)", "t": "사장", "o": "비츠로일렉트릭"}, {"s": "A-30", "n": "조재수", "t": "한국법인장", "o": "EPRI"}, {"s": "A-31", "n": "박기준", "t": "소장", "o": "AI연구소"}, {"s": "A-32", "n": "이병성", "t": "소장", "o": "안전연구소"}, {"s": "A-33", "n": "변승현", "t": "소장", "o": "융복합연구소"}, {"s": "A-34", "n": "김주용", "t": "소장", "o": "차세대배전연구소"}, {"s": "A-35", "n": "장성호", "t": "소장", "o": "기초전력연구센터"}, {"s": "A-36", "n": "송재근", "t": "실장", "o": "기획관리실"}, {"s": "A-37", "n": "차승태", "t": "소장", "o": "전력계통연구소"}, {"s": "A-38", "n": "박명혜", "t": "소장", "o": "디지털솔루션연구소"}, {"s": "A-39", "n": "이종민", "t": "소장", "o": "에너지환경연구소"}, {"s": "A-40", "n": "김용학", "t": "소장", "o": "신사업기술연구소"}]
-;
+const D = {"title": "2026 KEPCO R&D컨퍼런스 좌석배치(다목적 1홀)", "seats": [["C1-1", 3, 4], ["C1-2", 3, 5], ["C1-3", 3, 6], ["C1-4", 3, 7], ["C2-1", 3, 9], ["C2-2", 3, 10], ["C2-3", 3, 11], ["C2-4", 3, 12], ["C2-5", 3, 13], ["C2-6", 3, 14], ["A-1", 3, 19], ["A-2", 3, 20], ["A-3", 3, 21], ["A-4", 3, 22], ["A-5", 3, 23], ["A-6", 3, 24], ["A-7", 3, 25], ["A-8", 3, 26], ["A-9", 3, 27], ["A-10", 3, 28], ["B1-1", 3, 33], ["B1-2", 3, 34], ["B1-3", 3, 35], ["B1-4", 3, 36], ["B1-5", 3, 37], ["B1-6", 3, 38], ["B2-1", 3, 40], ["B2-2", 3, 41], ["B2-3", 3, 42], ["B2-4", 3, 43], ["C1-5", 8, 4], ["C1-6", 8, 5], ["C1-7", 8, 6], ["C1-8", 8, 7], ["C2-7", 8, 9], ["C2-8", 8, 10], ["C2-9", 8, 11], ["C2-10", 8, 12], ["C2-11", 8, 13], ["C2-12", 8, 14], ["A-11", 8, 19], ["A-12", 8, 20], ["A-13", 8, 21], ["A-14", 8, 22], ["A-15", 8, 23], ["A-16", 8, 24], ["A-17", 8, 25], ["A-18", 8, 26], ["A-19", 8, 27], ["A-20", 8, 28], ["B3-1", 8, 33], ["B3-2", 8, 34], ["B3-3", 8, 35], ["B3-4", 8, 36], ["B3-5", 8, 37], ["B3-6", 8, 38], ["B2-5", 8, 40], ["B2-6", 8, 41], ["B2-7", 8, 42], ["B2-8", 8, 43], ["C1-9", 13, 4], ["C1-10", 13, 5], ["C1-11", 13, 6], ["C1-12", 13, 7], ["C2-13", 13, 9], ["C2-14", 13, 10], ["C2-15", 13, 11], ["C2-16", 13, 12], ["C2-17", 13, 13], ["C2-18", 13, 14], ["A-21", 13, 19], ["A-22", 13, 20], ["A-23", 13, 21], ["A-24", 13, 22], ["A-25", 13, 23], ["A-26", 13, 24], ["A-27", 13, 25], ["A-28", 13, 26], ["A-29", 13, 27], ["A-30", 13, 28], ["B3-7", 13, 33], ["B3-8", 13, 34], ["B3-9", 13, 35], ["B3-10", 13, 36], ["B3-11", 13, 37], ["B3-12", 13, 38], ["B2-9", 13, 40], ["B2-10", 13, 41], ["B2-11", 13, 42], ["B2-12", 13, 43], ["C1-13", 18, 4], ["C1-14", 18, 5], ["C1-15", 18, 6], ["C1-16", 18, 7], ["C2-19", 18, 9], ["C2-20", 18, 10], ["C2-21", 18, 11], ["C2-22", 18, 12], ["C2-23", 18, 13], ["C2-24", 18, 14], ["A-31", 18, 19], ["A-32", 18, 20], ["A-33", 18, 21], ["A-34", 18, 22], ["A-35", 18, 23], ["A-36", 18, 24], ["A-37", 18, 25], ["A-38", 18, 26], ["A-39", 18, 27], ["A-40", 18, 28], ["B3-13", 18, 33], ["B3-14", 18, 34], ["B3-15", 18, 35], ["B3-16", 18, 36], ["B3-17", 18, 37], ["B3-18", 18, 38], ["B2-13", 18, 40], ["B2-14", 18, 41], ["B2-15", 18, 42], ["B2-16", 18, 43], ["D1-1", 24, 4], ["D1-2", 24, 5], ["D1-3", 24, 6], ["D1-14", 24, 7], ["D1-5", 24, 9], ["D1-6", 24, 10], ["D1-7", 24, 11], ["D1-8", 24, 12], ["D1-9", 24, 13], ["D1-10", 24, 14], ["D2-1", 24, 19], ["D2-2", 24, 20], ["D2-3", 24, 21], ["D2-4", 24, 22], ["D2-5", 24, 23], ["D2-6", 24, 24], ["D2-7", 24, 25], ["D2-8", 24, 26], ["D2-9", 24, 27], ["D2-10", 24, 28], ["D3-1", 24, 33], ["D3-2", 24, 34], ["D3-3", 24, 35], ["D3-4", 24, 36], ["D3-5", 24, 37], ["D3-6", 24, 38], ["D4-1", 24, 40], ["D4-2", 24, 41], ["D4-3", 24, 42], ["D4-4", 24, 43], ["D1-11", 29, 4], ["D1-12", 29, 5], ["D1-13", 29, 6], ["D1-8", 29, 7], ["D1-15", 29, 9], ["D1-16", 29, 10], ["D1-17", 29, 11], ["D1-18", 29, 12], ["D1-19", 29, 13], ["D1-20", 29, 14], ["D2-11", 29, 19], ["D2-12", 29, 20], ["D2-13", 29, 21], ["D2-14", 29, 22], ["D2-15", 29, 23], ["D2-16", 29, 24], ["D2-17", 29, 25], ["D2-18", 29, 26], ["D2-19", 29, 27], ["D2-20", 29, 28], ["D3-7", 29, 33], ["D3-8", 29, 34], ["D3-9", 29, 35], ["D3-10", 29, 36], ["D3-11", 29, 37], ["D3-12", 29, 38], ["D4-5", 29, 40], ["D4-6", 29, 41], ["D4-7", 29, 42], ["D4-8", 29, 43], ["D1-21", 34, 4], ["D1-22", 34, 5], ["D1-23", 34, 6], ["D1-24", 34, 7], ["D1-25", 34, 9], ["D1-26", 34, 10], ["D1-27", 34, 11], ["D1-28", 34, 12], ["D1-29", 34, 13], ["D1-30", 34, 14], ["D2-21", 34, 19], ["D2-22", 34, 20], ["D2-23", 34, 21], ["D2-24", 34, 22], ["D2-25", 34, 23], ["D2-26", 34, 24], ["D2-27", 34, 25], ["D2-28", 34, 26], ["D2-29", 34, 27], ["D2-30", 34, 28], ["D3-13", 34, 33], ["D3-14", 34, 34], ["D3-15", 34, 35], ["D3-16", 34, 36], ["D3-17", 34, 37], ["D3-18", 34, 38], ["D4-9", 34, 40], ["D4-10", 34, 41], ["D4-11", 34, 42], ["D4-12", 34, 43], ["D5-1", 40, 2], ["D5-2", 40, 3], ["D5-3", 40, 4], ["D5-4", 40, 5], ["D5-5", 40, 6], ["D5-6", 40, 7], ["D5-7", 40, 8], ["D5-8", 40, 9], ["D5-9", 40, 10], ["D5-10", 40, 11], ["D6-1", 40, 13], ["D6-2", 40, 14], ["D6-3", 40, 15], ["D6-4", 40, 16], ["D6-5", 40, 17], ["D6-6", 40, 18], ["D6-7", 40, 19], ["D6-8", 40, 20], ["D6-9", 40, 21], ["D6-10", 40, 22], ["D7-1", 40, 24], ["D7-2", 40, 25], ["D7-3", 40, 26], ["D7-4", 40, 27], ["D7-5", 40, 28], ["D7-6", 40, 29], ["D7-7", 40, 30], ["D7-8", 40, 31], ["D7-9", 40, 32], ["D7-10", 40, 33], ["D8-1", 40, 35], ["D8-2", 40, 36], ["D8-3", 40, 37], ["D8-4", 40, 38], ["D8-5", 40, 39], ["D8-6", 40, 40], ["D8-7", 40, 41], ["D8-8", 40, 42], ["D8-9", 40, 43], ["D8-10", 40, 44], ["D5-11", 45, 2], ["D5-12", 45, 3], ["D5-13", 45, 4], ["D5-14", 45, 5], ["D5-15", 45, 6], ["D5-16", 45, 7], ["D5-17", 45, 8], ["D5-18", 45, 9], ["D5-19", 45, 10], ["D5-20", 45, 11], ["D6-11", 45, 13], ["D6-12", 45, 14], ["D6-13", 45, 15], ["D6-14", 45, 16], ["D6-15", 45, 17], ["D6-16", 45, 18], ["D6-17", 45, 19], ["D6-18", 45, 20], ["D6-19", 45, 21], ["D6-20", 45, 22], ["D7-11", 45, 24], ["D7-12", 45, 25], ["D7-13", 45, 26], ["D7-14", 45, 27], ["D7-15", 45, 28], ["D7-16", 45, 29], ["D7-17", 45, 30], ["D7-18", 45, 31], ["D7-19", 45, 32], ["D7-20", 45, 33], ["D8-11", 45, 35], ["D8-12", 45, 36], ["D8-13", 45, 37], ["D8-14", 45, 38], ["D8-15", 45, 39], ["D8-16", 45, 40], ["D8-17", 45, 41], ["D8-18", 45, 42], ["D8-19", 45, 43], ["D8-20", 45, 44], ["D5-21", 50, 2], ["D5-22", 50, 3], ["D5-23", 50, 4], ["D5-24", 50, 5], ["D5-25", 50, 6], ["D5-26", 50, 7], ["D5-27", 50, 8], ["D5-28", 50, 9], ["D5-29", 50, 10], ["D5-30", 50, 11], ["D6-21", 50, 13], ["D6-22", 50, 14], ["D6-23", 50, 15], ["D6-24", 50, 16], ["D6-25", 50, 17], ["D6-26", 50, 18], ["D6-27", 50, 19], ["D6-28", 50, 20], ["D6-29", 50, 21], ["D6-30", 50, 22], ["D7-21", 50, 24], ["D7-22", 50, 25], ["D7-23", 50, 26], ["D7-24", 50, 27], ["D7-25", 50, 28], ["D7-26", 50, 29], ["D7-27", 50, 30], ["D7-28", 50, 31], ["D7-29", 50, 32], ["D7-30", 50, 33], ["D8-21", 50, 35], ["D8-22", 50, 36], ["D8-23", 50, 37], ["D8-24", 50, 38], ["D8-25", 50, 39], ["D8-26", 50, 40], ["D8-27", 50, 41], ["D8-28", 50, 42], ["D8-29", 50, 43], ["D8-30", 50, 44]], "people": [{"ids": ["C2-1"], "n": "이민철", "r": "", "t": "교수", "o": "인천대학교"}, {"ids": ["C2-2"], "n": "황지현", "r": "", "t": "교수", "o": "KENTECH"}, {"ids": ["C2-3"], "n": "홍정욱", "r": "", "t": "교수", "o": "KAIST"}, {"ids": ["C2-4"], "n": "이현우", "r": "", "t": "교수", "o": "KENTECH"}, {"ids": ["C2-5"], "n": "이주", "r": "", "t": "교수", "o": "한양대학교"}, {"ids": ["C2-6"], "n": "김형준", "r": "", "t": "교수", "o": "충남대학교"}, {"ids": ["A-1"], "n": "Nigel Reams", "r": "", "t": "CEO", "o": "Lumcloon Energy"}, {"ids": ["A-2"], "n": "Unggul Priyanto", "r": "", "t": "Council member", "o": "DEN"}, {"ids": ["A-3"], "n": "Satya Widya Yudha", "r": "", "t": "Council member", "o": "DEN"}, {"ids": ["A-4"], "n": "김태균", "r": "", "t": "CEO", "o": "한국전력기술"}, {"ids": ["A-5", "A-6"], "n": "김동철", "r": "", "t": "CEO", "o": "한국전력공사"}, {"ids": ["A-7"], "n": "문일주", "r": "", "t": "기술혁신본부장", "o": "한국전력공사"}, {"ids": ["A-8"], "n": "이정호", "r": "", "t": "고객서비스혁신본부장", "o": "한국전력공사"}, {"ids": ["A-9"], "n": "Dang Huy Cuong", "r": "", "t": "Board member", "o": "EVN"}, {"ids": ["A-10"], "n": "김대한", "r": "", "t": "전력연구원장", "o": "한국전력공사"}, {"ids": ["B1-1"], "n": "Mark McGranghan", "r": "", "t": "Fellow", "o": "EPRI"}, {"ids": ["B1-2"], "n": "조재수", "r": "", "t": "한국법인장", "o": "EPRI"}, {"ids": ["B1-3"], "n": "채우규", "r": "발표자4", "t": "책임", "o": "한국전력공사"}, {"ids": ["B1-4"], "n": "이제열", "r": "발표자3", "t": "선임", "o": "한국전력공사"}, {"ids": ["B1-5"], "n": "이중원", "r": "발표자2", "t": "책임", "o": "한국전력공사"}, {"ids": ["B1-6"], "n": "박정극", "r": "발표자1", "t": "책임", "o": "한국전력공사"}, {"ids": ["C2-7"], "n": "공태준", "r": "", "t": "박사", "o": "리벨리온"}, {"ids": ["C2-8"], "n": "김인수", "r": "", "t": "교수", "o": "인하대학교"}, {"ids": ["C2-9"], "n": "남순열", "r": "", "t": "교수", "o": "명지대학교"}, {"ids": ["C2-10"], "n": "이강섭", "r": "", "t": "대표", "o": "㈜케이엠데이타"}, {"ids": ["C2-11"], "n": "이동률", "r": "", "t": "대표", "o": "㈜세니온"}, {"ids": ["C2-12"], "n": "Fabio Romano", "r": "", "t": "Sales Engineer", "o": "KEMA Labs(CESI)"}, {"ids": ["A-12"], "n": "김수영", "r": "", "t": "상무", "o": "SK 나래에너지"}, {"ids": ["A-13"], "n": "이경모", "r": "", "t": "전무", "o": "현대중공업파워시스템"}, {"ids": ["A-14"], "n": "이병목", "r": "", "t": "전무", "o": "SGC에너지"}, {"ids": ["A-15"], "n": "김현경", "r": "", "t": "본부장", "o": "한국에너지기술평가원"}, {"ids": ["A-16"], "n": "이준호", "r": "", "t": "CEO", "o": "켑코솔라"}, {"ids": ["A-17"], "n": "장재원", "r": "", "t": "상근부회장", "o": "한국스마트그리드협회"}, {"ids": ["A-18"], "n": "김동섭", "r": "", "t": "전력산업 고문", "o": "LS 일렉트릭"}, {"ids": ["A-19"], "n": "김숙철", "r": "", "t": "대표이사", "o": "엔씨코리아"}, {"ids": ["A-20"], "n": "이찬주", "r": "", "t": "CTO", "o": "HD현대일렉트릭"}, {"ids": ["B3-4"], "n": "김정수", "r": "사장상12", "t": "선임", "o": "한전원자력연료"}, {"ids": ["B3-5"], "n": "이종일", "r": "사장상11", "t": "차장", "o": "한국전력기술"}, {"ids": ["B3-6"], "n": "최철현", "r": "사장상10", "t": "차장", "o": "한전KPS"}, {"ids": ["C2-13"], "n": "장유현", "r": "", "t": "책임연구원", "o": "한수원 중앙연구원"}, {"ids": ["C2-14"], "n": "우덕제", "r": "", "t": "AI연구부장", "o": "한전KDN"}, {"ids": ["C2-15"], "n": "김준홍", "r": "", "t": "부장", "o": "한전KPS"}, {"ids": ["C2-16"], "n": "박택근", "r": "", "t": "AI보안연구그룹장", "o": "한전KDN"}, {"ids": ["C2-17"], "n": "이성욱", "r": "", "t": "실장", "o": "한국 원자력연구원"}, {"ids": ["C2-18"], "n": "박정석", "r": "", "t": "센터장", "o": "한수원 중앙연구원"}, {"ids": ["A-21"], "n": "김성철", "r": "", "t": "연구원장", "o": "한전KDN 전력ICT연구원"}, {"ids": ["A-22"], "n": "최광식", "r": "", "t": "처장", "o": "한국수력원자력"}, {"ids": ["A-23"], "n": "이방욱", "r": "", "t": "공대학장", "o": "한양대학교"}, {"ids": ["A-24"], "n": "최종호", "r": "", "t": "실장", "o": "한국전력공사"}, {"ids": ["A-25"], "n": "곽상영", "r": "", "t": "처장", "o": "한국전력공사"}, {"ids": ["A-26"], "n": "심은보", "r": "", "t": "처장", "o": "한국전력공사"}, {"ids": ["A-27"], "n": "김경훈", "r": "", "t": "처장", "o": "한국전력공사"}, {"ids": ["A-28"], "n": "우정욱", "r": "", "t": "부원장", "o": "한국전력공사"}, {"ids": ["A-29"], "n": "이욱륜", "r": "", "t": "센터장", "o": "한국전력공사"}, {"ids": ["A-30"], "n": "오재훈", "r": "", "t": "상무", "o": "포스코 IH"}, {"ids": ["B3-7"], "n": "최인규", "r": "", "t": "(前)원장", "o": "한국전력공사"}, {"ids": ["B3-8"], "n": "장택수", "r": "", "t": "사장", "o": "비츠로일렉트릭"}, {"ids": ["B3-9"], "n": "이중호", "r": "", "t": "부사장", "o": "비츠로일렉트릭"}, {"ids": ["B3-10"], "n": "송일근", "r": "", "t": "대표이사", "o": "한국에너지솔루션주식회사"}, {"ids": ["B3-11"], "n": "이준신", "r": "", "t": "연구소장", "o": "에스티"}, {"ids": ["B3-12"], "n": "김강식", "r": "", "t": "(前)원장", "o": "한국전력공사"}, {"ids": ["C2-19"], "n": "하재열", "r": "", "t": "대리", "o": "한전KDN 전력ICT연구원"}, {"ids": ["C2-20"], "n": "김소람", "r": "", "t": "대리", "o": "한전KDN 전력ICT연구원"}, {"ids": ["C2-21"], "n": "최승윤", "r": "", "t": "과장", "o": "한전KDN 전력ICT연구원"}, {"ids": ["C2-22"], "n": "이승윤", "r": "", "t": "과장", "o": "한수원 중앙연구원"}, {"ids": ["C2-23"], "n": "배승훈", "r": "", "t": "차장", "o": "한전KDN 전력ICT연구원"}, {"ids": ["C2-24"], "n": "설우진", "r": "", "t": "선임연구원", "o": "한수원 중앙연구원"}, {"ids": ["A-31"], "n": "박기준", "r": "", "t": "소장", "o": "AI연구소"}, {"ids": ["A-32"], "n": "이병성", "r": "", "t": "소장", "o": "안전연구소"}, {"ids": ["A-33"], "n": "변승현", "r": "", "t": "소장", "o": "융복합연구소"}, {"ids": ["A-34"], "n": "김주용", "r": "", "t": "소장", "o": "차세대배전연구소"}, {"ids": ["A-35"], "n": "장성호", "r": "", "t": "소장", "o": "기초전력연구센터"}, {"ids": ["A-36"], "n": "송재근", "r": "", "t": "실장", "o": "기획관리실"}, {"ids": ["A-37"], "n": "차승태", "r": "", "t": "소장", "o": "전력계통연구소"}, {"ids": ["A-38"], "n": "박명혜", "r": "", "t": "소장", "o": "디지털솔루션연구소"}, {"ids": ["A-39"], "n": "이종민", "r": "", "t": "소장", "o": "에너지환경연구소"}, {"ids": ["A-40"], "n": "김용학", "r": "", "t": "소장", "o": "신사업기술연구소"}, {"ids": ["B3-13"], "n": "Tiara Ika Winarni", "r": "", "t": "서기관", "o": "주한인도네시아 대사관"}, {"ids": ["B3-14"], "n": "조경수", "r": "", "t": "실장", "o": "한국수력원자력 중앙연구원"}, {"ids": ["B3-15"], "n": "나승민", "r": "", "t": "실장", "o": "포스코"}, {"ids": ["B3-16"], "n": "박기준", "r": "발표자7", "t": "소장(수석)", "o": "한국전력공사"}, {"ids": ["B3-17"], "n": "이병성", "r": "발표자6", "t": "소장(수석)", "o": "한국전력공사"}, {"ids": ["B3-18"], "n": "이성두", "r": "발표자5", "t": "책임", "o": "한국전력공사"}], "version": "2026.11.03 배치도"};
+document.getElementById("eyebrow").textContent=D.title;
+document.getElementById("ver").textContent="명단 기준: "+D.version+" · "+D.people.length+"명";
 const CHO="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
 const isJamo=c=>CHO.includes(c);
-const cho=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?CHO[Math.floor(k/588)]:c};
+const syl=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?k:-1};
+const cho=c=>{const k=syl(c);return k<0?c:CHO[Math.floor(k/588)]};
+const jung=c=>{const k=syl(c);return k<0?-1:Math.floor((k%588)/28)};
+const jong=c=>{const k=syl(c);return k<0?-1:k%28};
 const norm=s=>(s||"").toLowerCase().replace(/\s+/g,"");
-// match: returns [start,len] in normalized target or null; query jamo matches syllable's initial
-const jong=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?k%28:-1};
-const jung=c=>{const k=c.charCodeAt(0)-0xAC00;return (k>=0&&k<11172)?Math.floor((k%588)/28):-1};
-// returns [start,len,loose] ; loose = matched only because the last syllable is still being typed
+// [start,len,loose]; loose = last syllable still being typed (주→준)
 function find(target,q){
   const t=norm(target);let best=null;
   for(let i=0;i+q.length<=t.length;i++){
     let ok=true,loose=false;
     for(let j=0;j<q.length;j++){const a=t[i+j],b=q[j];
       if(a===b)continue; if(isJamo(b)&&cho(a)===b)continue;
-      // last syllable without 받침, still being typed: 주 → 준, 규 → 균
       if(j===q.length-1&&jong(b)===0&&cho(a)===cho(b)&&jung(a)===jung(b)){loose=true;continue}
       ok=false;break}
     if(ok){if(!loose)return [i,q.length,false]; if(!best)best=[i,q.length,true]}
   }
   return best;
 }
-// map normalized index back to original string for highlighting
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function hl(orig,m){
   if(!m)return esc(orig);
   let n=-1,s=-1,e=-1;
@@ -86,40 +97,63 @@ function hl(orig,m){
   if(s<0||e<0)return esc(orig);
   return esc(orig.slice(0,s))+"<mark>"+esc(orig.slice(s,e))+"</mark>"+esc(orig.slice(e));
 }
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-const people=DATA.filter(d=>d.n);
-const idx=s=>parseInt(s.split("-")[1],10);
-function map(seat){
-  const k=idx(seat);let h="";
-  for(let i=1;i<=40;i++)h+=`<i class="${i===k?"on":""}">${i===k?i:""}</i>`;
-  return h;
+// ---- geometry from the sheet ----
+const SEAT={};D.seats.forEach(([id,r,c])=>{if(!SEAT[id])SEAT[id]={r,c}});
+const filled=new Set();D.people.forEach(p=>p.ids.forEach(i=>filled.add(i)));
+function compress(vals,gapAt){const u=[...new Set(vals)].sort((a,b)=>a-b),m={};let k=0,prev=null;
+  for(const v of u){ if(prev!==null) k+= (v-prev>gapAt)?2:1; else k=1; m[v]=k; prev=v } return [m,k]}
+const [HR,HRN]=compress(D.seats.map(s=>s[1]),5), [HC,HCN]=compress(D.seats.map(s=>s[2]),1);
+const pre=id=>id.split("-")[0];
+const BLK={};D.seats.forEach(([id,r,c])=>{(BLK[pre(id)]=BLK[pre(id)]||[]).push([id,r,c])});
+const BG={};for(const b in BLK){const [rm,rn]=compress(BLK[b].map(s=>s[1]),99),[cm,cn]=compress(BLK[b].map(s=>s[2]),99);BG[b]={rm,rn,cm,cn}}
+function hallMap(ids){
+  let h="";for(const [id,r,c] of D.seats){
+    const on=ids.includes(id);h+=`<i class="${on?"on":filled.has(id)?"f":""}" style="grid-row:${HR[r]};grid-column:${HC[c]}"></i>`}
+  return `<div class="hall" style="grid-template-columns:repeat(${HCN},1fr)">${h}</div>`;
 }
-function card(p,mn,mt,mo){
-  const k=idx(p.s),row=Math.ceil(k/10),col=(k-1)%10+1;
-  return `<article class="card">
-    <div class="seat">${p.s}</div>
-    <div class="name">${hl(p.n,mn)}</div>
-    <div class="meta">${hl(p.t,mt)} · ${hl(p.o,mo)}</div>
-    <div class="map" aria-hidden="true">${map(p.s)}</div>
-    <div class="where"><b>${row}행 ${col}번째</b> 좌석 (엑셀 배치 기준)</div>
+function blockMap(ids){
+  const b=pre(ids[0]),g=BG[b];let h="";
+  for(const [id,r,c] of BLK[b]){const on=ids.includes(id);
+    h+=`<i class="${on?"on":""}" style="grid-row:${g.rm[r]};grid-column:${g.cm[c]}">${id.split("-")[1]}</i>`}
+  return `<div class="blk" style="grid-template-columns:repeat(${g.cn},1fr);max-width:${Math.min(100,g.cn*12)}%">${h}</div>`;
+}
+function where(ids){
+  const b=pre(ids[0]),g=BG[b],s=SEAT[ids[0]];
+  return `<b>${b}구역</b> · 위에서 <b>${g.rm[s.r]}</b>번째 줄 · 왼쪽에서 <b>${g.cm[s.c]}</b>번째`;
+}
+const seatLabel=ids=>ids.length>1?ids[0]+"~"+ids[ids.length-1].split("-")[1]:ids[0];
+const order=id=>{const s=SEAT[id];return s.r*100+s.c};
+function card(p,m,full){
+  return `<article class="card" tabindex="0" data-i="${p._i}">
+    <div class="seat">${esc(seatLabel(p.ids))}<small>${esc(pre(p.ids[0]))}구역</small></div>
+    <div class="name">${hl(p.n,m.n)}</div>
+    <div class="meta">${hl(p.t,m.t)} · ${hl(p.o,m.o)}</div>
+    ${p.r?`<div class="role">${hl(p.r,m.r)}</div>`:"<div></div>"}
+    <div class="where">${where(p.ids)}</div>
+    <div class="lbl">구역 확대</div>${blockMap(p.ids)}
+    ${full?`<div class="lbl">홀 전체에서 위치</div>${hallMap(p.ids)}`:`<div class="hint">눌러서 홀 전체 위치 보기</div>`}
   </article>`;
 }
+D.people.forEach((p,i)=>p._i=i);
+const opened=new Set();
 const $q=document.getElementById("q"),$l=document.getElementById("list"),$c=document.getElementById("count"),$x=document.getElementById("clear");
 function render(){
   const q=norm($q.value);$x.hidden=!q;
-  let res=[];
-  for(const p of people){
-    if(!q){res.push([p,0,null,null,null]);continue}
-    const mn=find(p.n,q),mt=find(p.t,q),mo=find(p.o,q);
-    if(mn||mt||mo){const score=mn?(mn[2]?2:0)+(mn[0]===0?0:1):4;res.push([p,score,mn,mt,mo])}
+  const res=[];
+  for(const p of D.people){
+    if(!q){res.push([p,0,{}]);continue}
+    const m={n:find(p.n,q),t:find(p.t,q),o:find(p.o,q),r:find(p.r,q)};
+    if(m.n||m.t||m.o||m.r){const score=m.n?(m.n[2]?2:0)+(m.n[0]===0?0:1):4;res.push([p,score,m])}
   }
-  res.sort((a,b)=>a[1]-b[1]||idx(a[0].s)-idx(b[0].s));
-  $c.textContent=q?`${res.length}명 일치`:`전체 ${people.length}명 · 이름 첫 글자만 입력해도 됩니다`;
-  $l.innerHTML=res.length?res.map(r=>card(r[0],r[2],r[3],r[4])).join(""):`<div class="none">“${esc($q.value)}”와 일치하는 VIP가 없습니다.<br>성만 입력하거나 소속으로 찾아보세요.</div>`;
+  res.sort((a,b)=>a[1]-b[1]||order(a[0].ids[0])-order(b[0].ids[0]));
+  $c.textContent=q?`${res.length}명 일치`:`전체 ${D.people.length}명 · 이름 첫 글자만 입력해도 됩니다`;
+  const full=res.length<=3;
+  $l.innerHTML=res.length?res.map(r=>card(r[0],r[2],full||opened.has(r[0]._i))).join(""):`<div class="none">“${esc($q.value)}”와 일치하는 사람이 없습니다.<br>성만 입력하거나 소속으로 찾아보세요.</div>`;
 }
-$q.addEventListener("input",render);
+$l.addEventListener("click",e=>{const c=e.target.closest(".card");if(!c)return;const i=+c.dataset.i;opened.has(i)?opened.delete(i):opened.add(i);render()});
+$q.addEventListener("input",()=>{opened.clear();render()});
 $q.addEventListener("compositionupdate",()=>setTimeout(render,0));
-$x.addEventListener("click",()=>{$q.value="";render();$q.focus()});
+$x.addEventListener("click",()=>{$q.value="";opened.clear();render();$q.focus()});
 render();
 </script>
 </body></html>
